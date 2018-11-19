@@ -1,0 +1,74 @@
+from flask import Flask, render_template, request
+from datetime import datetime
+import requests, json, time
+
+app = Flask(__name__)
+
+# use ENV VARIABLE / SECRET
+apikey = 'AIzaSyDRtANEJbPszXVTopPeo3s-FJkuHo0B_Qc'
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if request.method == "GET":
+        return render_template("index.html")
+    if request.method == "POST":
+      city = request.form.get("city")
+      
+      # query API for latitude and longitude 
+      url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + city + "&language=en&key=" + apikey
+      r = requests.get(url)
+
+      # unserialize json
+      res = json.loads(r.content)
+      # check if response is 200 ! Change, check for error (dict)
+      if res['status'] == "OK":        
+        # get latitude
+        lat = res['results'][0]['geometry']['location']['lat']
+        # get longitude
+        lng = res['results'][0]['geometry']['location']['lng']
+        # get name of city
+        name = res['results'][0]['formatted_address']
+
+        # convert everything to string
+        unixutcnow = int(time.time())
+        lat = str(lat)
+        lng = str(lng)
+        unixutcnow = str(unixutcnow)
+
+        # TO DO: CREATE API TO EXPORT DATA (JSON). ACCEPTS A CITY NAME AN RETURNS NAME+TIME
+
+        # query API for timezone 
+        t = requests.get("https://maps.googleapis.com/maps/api/timezone/json?location=" + lat + "," + lng + "&timestamp=" + unixutcnow + "&key=" + apikey)
+        # unserialize json
+        tres = json.loads(t.content)
+        if tres['status'] == "OK":
+          # get offset (difference in seconds between current timezone and UTC)
+          dstoffset = tres['dstOffset']
+          rawoffset =  tres['rawOffset']
+          intunixutcnow = int(unixutcnow)
+
+          # calculate local time (city)
+          timeunix = intunixutcnow + ((rawoffset) + (dstoffset))
+
+          hour = datetime.utcfromtimestamp(timeunix).strftime('%H:%M')
+          date = datetime.utcfromtimestamp(timeunix).strftime('%d/%m/%Y')
+
+          return render_template("time.html", hour=hour, date=date, name=name)
+        else:
+          return "API error, unable to find timezone"
+   
+      else:
+        return "API error, unable to find city"
+
+
+@app.route("/api/city=<string:city>")
+def rai(city):
+  city = city.replace("+", " ")
+  return city
+# return time json with time, na
+
+
+
+if __name__ == '__main__':
+    app.run(debug=True,host='0.0.0.0')
+  

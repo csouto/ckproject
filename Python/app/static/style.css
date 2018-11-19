@@ -1,0 +1,31 @@
+/* style.css */
+
+#time {
+	background: url("map.jpg") no-repeat center center fixed;
+  	-webkit-background-size: cover;
+  	-moz-background-size: cover;
+  	-o-background-size: cover;
+  	background-size: cover;
+  	padding: 265px;	
+}
+
+#coltime {
+	background-color: white;
+	padding: 60px;
+	border-radius: 15px;
+	border: 1px;
+	box-shadow: 3px 3px grey;
+}
+
+
+body {
+	padding: 90px;
+	/*background-color: grey;*/
+    font-family: Courier;
+    font-weight: lighter;
+	background: url("clocks.jpeg") no-repeat center center fixed;
+  	-webkit-background-size: cover;
+  	-moz-background-size: cover;
+  	-o-background-size: cover;
+  	background-size: cover;
+}
